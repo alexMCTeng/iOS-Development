@@ -18,8 +18,6 @@ When there's no search query, the main page will display movies according to the
 
 The whole operation will not lock up the user interface, users can still traverse in the app when the query is done in the background.
 
-A test
-
 After the search, if users want to go back to main page, can simply clear out the search bar textfield and click search. Or, users can go to Setting tab and click save changes, the main page will be displayed.
 
 2. Detailed View Controllers from the Movie tab (main page) and Favorite tab
