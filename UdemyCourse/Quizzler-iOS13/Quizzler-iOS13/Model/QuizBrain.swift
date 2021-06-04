@@ -25,14 +25,17 @@ struct QuizBrain{
     ]
     
     var questionIndex: Int = 0
+    var score: Int = 0
     
     mutating func checkAnswer(_ userAnswer: String) -> Bool{
         if String(userAnswer).caseInsensitiveCompare(quiz[questionIndex].answer) == .orderedSame{
             if questionIndex + 1 < quiz.count{
                 questionIndex += 1
+                score += 1
                 return true
             } else{
                 questionIndex = 0
+                score = 0
                 return true
             }
         } else{
@@ -50,5 +53,9 @@ struct QuizBrain{
     
     func getProgress() -> Float{
         return Float(questionIndex + 1) / Float(quiz.count)
+    }
+    
+    func getScore() -> Int{
+        return score
     }
 }
