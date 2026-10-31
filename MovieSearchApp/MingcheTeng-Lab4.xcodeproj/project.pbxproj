@@ -6,6 +6,56 @@
 	objectVersion = 50;
 	objects = {
 
+/* Programmatic UI regression tests */
+        AA0000020000000000000001 = {isa = PBXBuildFile; fileRef = AA0000020000000000000002; };
+        AA0000020000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieSearchAppTests/ProgrammaticUITests.swift; sourceTree = SOURCE_ROOT; };
+        AA0000020000000000000003 = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = MovieSearchAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+        AA0000020000000000000004 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (AA0000020000000000000001,); runOnlyForDeploymentPostprocessing = 0; };
+        AA0000020000000000000005 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+        AA0000020000000000000006 = {isa = PBXContainerItemProxy; containerPortal = B0C3C4B42541B2DA009385AE; proxyType = 1; remoteGlobalIDString = B0C3C4BB2541B2DA009385AE; remoteInfo = "MingcheTeng-Lab4"; };
+        AA0000020000000000000007 = {isa = PBXTargetDependency; target = B0C3C4BB2541B2DA009385AE; targetProxy = AA0000020000000000000006; };
+        AA0000020000000000000008 = {
+            isa = PBXNativeTarget;
+            buildConfigurationList = AA0000020000000000000009;
+            buildPhases = (AA0000020000000000000004, AA0000020000000000000005,);
+            buildRules = ();
+            dependencies = (AA0000020000000000000007,);
+            name = MovieSearchAppTests;
+            productName = MovieSearchAppTests;
+            productReference = AA0000020000000000000003;
+            productType = "com.apple.product-type.bundle.unit-test";
+        };
+        AA0000020000000000000009 = {isa = XCConfigurationList; buildConfigurations = (AA000002000000000000000A, AA000002000000000000000B,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+        AA000002000000000000000A = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                BUNDLE_LOADER = "$(TEST_HOST)";
+                TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MingcheTeng-Lab4.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MingcheTeng-Lab4";
+                GENERATE_INFOPLIST_FILE = YES;
+                PRODUCT_BUNDLE_IDENTIFIER = "alexT.MovieSearchAppTests";
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                SWIFT_VERSION = 5.0;
+                TARGETED_DEVICE_FAMILY = "1,2";
+                LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks",);
+            };
+            name = Debug;
+        };
+        AA000002000000000000000B = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                BUNDLE_LOADER = "$(TEST_HOST)";
+                TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MingcheTeng-Lab4.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MingcheTeng-Lab4";
+                GENERATE_INFOPLIST_FILE = YES;
+                PRODUCT_BUNDLE_IDENTIFIER = "alexT.MovieSearchAppTests";
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                SWIFT_VERSION = 5.0;
+                TARGETED_DEVICE_FAMILY = "1,2";
+                LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks",);
+            };
+            name = Release;
+        };
+
+
 /* Begin PBXBuildFile section */
 		B006A0C325511E0A00A07CD4 /* SettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B006A0C225511E0A00A07CD4 /* SettingViewController.swift */; };
 		B006A0C525517B9F00A07CD4 /* settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B006A0C425517B9F00A07CD4 /* settings.swift */; };
@@ -17,10 +67,10 @@
 		B0C3C4C02541B2DA009385AE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C3C4BF2541B2DA009385AE /* AppDelegate.swift */; };
 		B0C3C4C22541B2DA009385AE /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C3C4C12541B2DA009385AE /* SceneDelegate.swift */; };
 		B0C3C4C42541B2DA009385AE /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C3C4C32541B2DA009385AE /* ViewController.swift */; };
-		B0C3C4C72541B2DA009385AE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B0C3C4C52541B2DA009385AE /* Main.storyboard */; };
 		B0C3C4C92541B2DB009385AE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0C3C4C82541B2DB009385AE /* Assets.xcassets */; };
 		B0C3C4CC2541B2DB009385AE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B0C3C4CA2541B2DB009385AE /* LaunchScreen.storyboard */; };
 		B0DF0E63254E8CA300180096 /* DetailedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0DF0E62254E8CA300180096 /* DetailedViewController.swift */; };
+		AA0000010000000000000001 /* MovieDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000010000000000000002 /* MovieDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,11 +85,11 @@
 		B0C3C4BF2541B2DA009385AE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B0C3C4C12541B2DA009385AE /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		B0C3C4C32541B2DA009385AE /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		B0C3C4C62541B2DA009385AE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B0C3C4C82541B2DB009385AE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B0C3C4CB2541B2DB009385AE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B0C3C4CD2541B2DB009385AE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B0DF0E62254E8CA300180096 /* DetailedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailedViewController.swift; sourceTree = "<group>"; };
+		AA0000010000000000000002 /* MovieDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +107,7 @@
 			isa = PBXGroup;
 			children = (
 				B0C3C4BE2541B2DA009385AE /* MingcheTeng-Lab4 */,
+                AA0000020000000000000002 /* ProgrammaticUITests.swift */,
 				B0C3C4BD2541B2DA009385AE /* Products */,
 			);
 			sourceTree = "<group>";
@@ -65,6 +116,7 @@
 			isa = PBXGroup;
 			children = (
 				B0C3C4BC2541B2DA009385AE /* MingcheTeng-Lab4.app */,
+                AA0000020000000000000003 /* MovieSearchAppTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -76,11 +128,11 @@
 				B0C3C4C12541B2DA009385AE /* SceneDelegate.swift */,
 				B0C3C4C32541B2DA009385AE /* ViewController.swift */,
 				B0DF0E62254E8CA300180096 /* DetailedViewController.swift */,
+				AA0000010000000000000002 /* MovieDetailView.swift */,
 				B080C29325485B8600701743 /* MainpageCollectionViewCell.swift */,
 				B06EF5712542C5D600A8ECDF /* APIResults.swift */,
 				B06EF5732542C64300A8ECDF /* Movie.swift */,
 				B090381D254EEF7600BC7A83 /* FavoriteViewController.swift */,
-				B0C3C4C52541B2DA009385AE /* Main.storyboard */,
 				B006A0C225511E0A00A07CD4 /* SettingViewController.swift */,
 				B006A0C425517B9F00A07CD4 /* settings.swift */,
 				B05CAAD725505E4800DD4B1D /* DetailedViewController_fav.swift */,
@@ -139,6 +191,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+                AA0000020000000000000008 /* MovieSearchAppTests */,
 				B0C3C4BB2541B2DA009385AE /* MingcheTeng-Lab4 */,
 			);
 		};
@@ -151,7 +204,6 @@
 			files = (
 				B0C3C4CC2541B2DB009385AE /* LaunchScreen.storyboard in Resources */,
 				B0C3C4C92541B2DB009385AE /* Assets.xcassets in Resources */,
-				B0C3C4C72541B2DA009385AE /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,6 +216,7 @@
 			files = (
 				B006A0C525517B9F00A07CD4 /* settings.swift in Sources */,
 				B0DF0E63254E8CA300180096 /* DetailedViewController.swift in Sources */,
+				AA0000010000000000000001 /* MovieDetailView.swift in Sources */,
 				B080C29425485B8600701743 /* MainpageCollectionViewCell.swift in Sources */,
 				B0C3C4C42541B2DA009385AE /* ViewController.swift in Sources */,
 				B0C3C4C02541B2DA009385AE /* AppDelegate.swift in Sources */,
@@ -179,14 +232,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		B0C3C4C52541B2DA009385AE /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				B0C3C4C62541B2DA009385AE /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
+
 		B0C3C4CA2541B2DB009385AE /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -248,7 +294,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -302,7 +348,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -319,12 +365,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = S7NG4VY6J3;
 				INFOPLIST_FILE = "MingcheTeng-Lab4/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "alexT.MingcheTeng-Lab4";
+				PRODUCT_BUNDLE_IDENTIFIER = "alexT.MingcheTeng-movieSearch";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -338,12 +384,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = S7NG4VY6J3;
 				INFOPLIST_FILE = "MingcheTeng-Lab4/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "alexT.MingcheTeng-Lab4";
+				PRODUCT_BUNDLE_IDENTIFIER = "alexT.MingcheTeng-movieSearch";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

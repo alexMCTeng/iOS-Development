@@ -24,9 +24,6 @@
 
 /*
  Attended TA hours:
- 10/27, Michael
-    Q:collectionView.register() keeps crashing the app as there's a nil value
-    A:collectionView.register() should be used if we programmatically create a collectionViewCell, since I'm doing it on the storyboard, once I used register, it'll create a new collectionViewCell which is not my custom cell. Solved by deleting the register()
  11/2, Emma
     Q: When user tries to get the detailed info of a movie from favorite, the detailedViewController keeps throwing error message that indicates there's no Movie object passed into it. I checked the Movie object did pass to the detailedViewController by print everything out.
     A: Emma suggested that I may create another detailedViewController for favorite only, detailedViewController_fav in my case, and just redo the whole things again just like I did in the detailedViewController. It works, but I don't know why my origial way cannot work out.
@@ -46,17 +43,17 @@
 import UIKit
 import SystemConfiguration
 
-class ViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UISearchBarDelegate, UIContextMenuInteractionDelegate{
-    
+class ViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UISearchBarDelegate, UIContextMenuInteractionDelegate, UICollectionViewDelegateFlowLayout {
+
     // Implement the context menu for extra credit,
     // Learned context menu from https://stackoverflow.com/questions/61158026/how-to-know-which-uicollectionview-cell-is-triggered-for-context-menu-on-ios-13
     // and https://blog.apphud.com/context-menus/
     // Simply implement the delegate method by returning a UIContextMenuConfiguration
-    
+
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         return UIContextMenuConfiguration(identifier:nil, previewProvider: nil)
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
 
         let config = UIContextMenuConfiguration(identifier: nil, previewProvider: nil){
@@ -100,7 +97,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         }
         return config
     }
-    
+
     /*
      addToFav and removeFromFav are solely used in context menu. These methods are pretty similar to the one in detailedViewController.
      */
@@ -116,7 +113,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         UserDefaults.standard.set(favMovieList, forKey: "movieDB")
         UserDefaults.standard.set(favMovieImageList, forKey: "movieImageDB")
     }
-    
+
     private func removeFromFav(index:Int){
         var favMovieList = UserDefaults.standard.array(forKey: "movieDB") as? [Data] ?? []
         var favMovieImageList = UserDefaults.standard.array(forKey: "movieImageDB") as? [NSData] ?? []
@@ -133,24 +130,24 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
             }
         }
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return theImageCache.count
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "movieCell", for: indexPath) as! MainpageCollectionViewCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MainpageCollectionViewCell.reuseIdentifier, for: indexPath) as! MainpageCollectionViewCell
         cell.cellImage.image = theImageCache[indexPath.row]
         cell.cellTitle.text = theMovieTitle[indexPath.row]
         return cell
     }
-    
+
     /*
      Network reachability is learned from: https://www.youtube.com/watch?v=AoSGcDNmbxo
      I have this creative idea since the suggested creative idea on piazza which recommend us to store everything on local device so users can see their favorite movie detailed info even when they are out of Internet Service.
      */
     private let reachability = SCNetworkReachabilityCreateWithName(nil, "https://api.themoviedb.org/3/movie/76341?api_key=00000000000000000000000000000000")
-    
+
     private func checkReachability(){
         var flag = SCNetworkReachabilityFlags()
         SCNetworkReachabilityGetFlags(self.reachability!, &flag)
@@ -166,7 +163,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
             present(ac, animated: true, completion: nil)
         }
     }
-    
+
     private func isNetworkReachable(with flag:SCNetworkReachabilityFlags) -> Bool{
         let isReachable = flag.contains(.reachable)
         let connectRequired = flag.contains(.connectionRequired)
@@ -177,27 +174,33 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     // end of quote of network reachability
 
     var isConnected:Bool!
-    @IBOutlet weak var searchSpinner: UIActivityIndicatorView!
-    @IBOutlet weak var mainPageSpinner: UIActivityIndicatorView!
-    @IBOutlet weak var theSearchBar: UISearchBar!
-    @IBOutlet weak var collectionView: UICollectionView!
+    private let searchSpinner = UIActivityIndicatorView(style: .large)
+    private let mainPageSpinner = UIActivityIndicatorView(style: .medium)
+    private let theSearchBar = UISearchBar()
+    private let collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.itemSize = CGSize(width: 179, height: 187)
+        layout.minimumLineSpacing = 10
+        layout.minimumInteritemSpacing = 10
+        return UICollectionView(frame: .zero, collectionViewLayout: layout)
+    }()
     var theDataResult: [APIResults?] = []
     var theImageCache:[UIImage] = []
     var theMovieTitle:[String] = []
     var theMovieList:[Movie] = []
-    @IBOutlet weak var searchBarText: UISearchBar!
-    
+
     var adultContent:String = "true"
     var currentPage:Int = 1
     var curLanguage:String = "en-US"
     var isSearching:Bool = false
     var isLoading:Bool = true
-    
+    private var previousCollectionViewWidth: CGFloat = 0
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        checkReachability()
+        view.backgroundColor = .systemBackground
         setupCollectionView()
+        checkReachability()
         self.searchSpinner.isHidden = false
         self.searchSpinner.startAnimating()
         // DispatchQueue learned from lecture videos, lecture 10
@@ -217,7 +220,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         let interaction = UIContextMenuInteraction(delegate: self)
         view.addInteraction(interaction)
     }
-    
+
     // A function that set the language and adult content variables, then to perfrom query.
     @objc func settingSetup(){
         checkReachability()
@@ -227,7 +230,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     //        print(settingPass.shareInstance.language)
             curLanguage = settingPass.shareInstance.language
             adultContent = settingPass.shareInstance.adultContent
-            searchBarText.text = ""
+            theSearchBar.text = ""
             isSearching = false
             theDataResult = []
             theMovieList = []
@@ -251,7 +254,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
             }
         }
     }
-        
+
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if(indexPath.row == theMovieTitle.count - 1 && isSearching == false && isLoading == false){
             checkReachability()
@@ -275,7 +278,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
             }
         }
     }
-    
+
     /*
     Quoted from: https://www.themoviedb.org/settings/api
     Initically, we load some movies to display in mainpage
@@ -292,41 +295,93 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     }
 
     func setupCollectionView(){
+        collectionView.backgroundColor = .systemBackground
+        collectionView.keyboardDismissMode = .onDrag
+        collectionView.alwaysBounceVertical = true
+        collectionView.register(MainpageCollectionViewCell.self,
+                                forCellWithReuseIdentifier: MainpageCollectionViewCell.reuseIdentifier)
+        theSearchBar.placeholder = "Search Movie"
+        for subview in [theSearchBar, collectionView, mainPageSpinner] {
+            view.addSubview(subview)
+        }
         collectionView.dataSource = self
         collectionView.delegate = self
         theSearchBar.delegate = self
+        setupMainPageLayout()
+        setupSpinners()
         mainPageSpinner.isHidden = true
         searchSpinner.isHidden = true
     }
-    
+
+    private func setupMainPageLayout() {
+        theSearchBar.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        mainPageSpinner.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            theSearchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            theSearchBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            theSearchBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            theSearchBar.heightAnchor.constraint(equalToConstant: 44),
+
+            collectionView.topAnchor.constraint(equalTo: theSearchBar.bottomAnchor, constant: 8),
+            collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+
+            mainPageSpinner.centerXAnchor.constraint(equalTo: collectionView.centerXAnchor),
+            mainPageSpinner.centerYAnchor.constraint(equalTo: collectionView.centerYAnchor)
+        ])
+    }
+
+    private func setupSpinners() {
+        searchSpinner.hidesWhenStopped = true
+        mainPageSpinner.hidesWhenStopped = true
+        searchSpinner.frame = collectionView.bounds
+        searchSpinner.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        collectionView.backgroundView = searchSpinner
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        searchSpinner.frame = collectionView.bounds
+
+        if previousCollectionViewWidth != collectionView.bounds.width {
+            previousCollectionViewWidth = collectionView.bounds.width
+            collectionView.collectionViewLayout.invalidateLayout()
+        }
+    }
+
     // The source of error image: https://www.iconsdb.com/red-icons/error-4-icon.html
     // The function is suggested by lecture video 10.
     func cacheImage(page: Int){
         checkReachability()
         if isConnected == true{
 //            print(theDataResult)
-            for movie in theDataResult[page-1]!.results{
-                if movie.poster_path != nil{
-                    let posterPath = movie.poster_path!
-                    let imagePath = URL(string:"https://image.tmdb.org/t/p/w500" + posterPath)
-                    let imageData = try? Data(contentsOf: imagePath!)
-                    if imageData != nil{
-                        let movieImage = UIImage(data: imageData!)
-                        theImageCache.append(movieImage!)
-                    }else{
-                        let movieImage = UIImage(data: (UIImage(named: "error")?.jpegData(compressionQuality: 0.5))!)
+            if(theDataResult[page - 1] != nil){
+                for movie in theDataResult[page-1]!.results{
+                    if movie.poster_path != nil{
+                        let posterPath = movie.poster_path!
+                        let imagePath = URL(string:"https://image.tmdb.org/t/p/w500" + posterPath)
+                        let imageData = try? Data(contentsOf: imagePath!)
+                        if imageData != nil{
+                            let movieImage = UIImage(data: imageData!)
+                            theImageCache.append(movieImage!)
+                        }else{
+                            let movieImage = UIImage(data: (UIImage(named: "error")?.jpegData(compressionQuality: 0.5))!)
+                            theImageCache.append(movieImage!)
+                        }
+                    } else{
+                        let movieImage = UIImage(named: "error")
                         theImageCache.append(movieImage!)
                     }
-                } else{
-                    let movieImage = UIImage(named: "error")
-                    theImageCache.append(movieImage!)
+                    theMovieList.append(movie)
+                    theMovieTitle.append(movie.title)
                 }
-                theMovieList.append(movie)
-                theMovieTitle.append(movie.title)
             }
         }
     }
-    
+
     // Learned from https://www.raywenderlich.com/4363809-uisearchcontroller-tutorial-getting-started
     // Learned spinner from https://stackoverflow.com/questions/28865659/hide-activity-indicator
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
@@ -414,25 +469,33 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
                         settingPass.shareInstance.isLoading = false
                     }
                 }
-                
-            }
-        }
-    }
 
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        checkReachability()
-        if isConnected == true{
-            if segue.identifier == "detailed"{
-                let detailedVC = segue.destination as! DetailedViewController
-    //            detailedVC.loadView()
-    //            detailedVC.detailedImage.image = theImageCache[sender as! Int]
-    //            detailedVC.detailedTitle.text = theMovieTitle[sender as! Int]
-                detailedVC.movie = theMovieList[sender as! Int]
             }
         }
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        performSegue(withIdentifier: "detailed", sender: indexPath.row)
+        checkReachability()
+        guard isConnected == true else { return }
+        let detail = DetailedViewController(movie: theMovieList[indexPath.row],
+                                            image: theImageCache[indexPath.row])
+        navigationController?.pushViewController(detail, animated: true)
+    }
+
+    // Center cells horizontally in the collection view
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        let numberOfItems = self.collectionView(collectionView, numberOfItemsInSection: section)
+        guard numberOfItems > 0 else { return .zero }
+        let flowLayout = collectionViewLayout as! UICollectionViewFlowLayout
+        let itemSpacing = flowLayout.minimumInteritemSpacing
+        let itemWidth = flowLayout.itemSize.width
+        let availableWidth = collectionView.bounds.width - collectionView.adjustedContentInset.left - collectionView.adjustedContentInset.right
+        let itemsPerRow = max(Int((availableWidth + itemSpacing) / (itemWidth + itemSpacing)), 1)
+        let visibleItemsInRow = min(numberOfItems, itemsPerRow)
+        let totalCellWidth = itemWidth * CGFloat(visibleItemsInRow)
+        let totalSpacingWidth = itemSpacing * CGFloat(max(visibleItemsInRow - 1, 0))
+        let totalWidth = totalCellWidth + totalSpacingWidth
+        let inset = max((availableWidth - totalWidth) / 2, 0)
+        return UIEdgeInsets(top: flowLayout.sectionInset.top, left: inset, bottom: flowLayout.sectionInset.bottom, right: inset)
     }
 }

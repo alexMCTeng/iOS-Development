@@ -11,8 +11,42 @@
 import UIKit
 
 class MainpageCollectionViewCell: UICollectionViewCell {
-    
-    @IBOutlet weak var cellImage: UIImageView!
-    @IBOutlet weak var cellTitle: UILabel!
-    
+
+    static let reuseIdentifier = "movieCell"
+    let cellImage = UIImageView()
+    let cellTitle = UILabel()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        cellImage.contentMode = .scaleAspectFit
+        cellImage.clipsToBounds = true
+        cellTitle.font = .systemFont(ofSize: 17)
+        cellTitle.numberOfLines = 2
+        cellTitle.textAlignment = .center
+        cellTitle.backgroundColor = .opaqueSeparator
+        for subview in [cellImage, cellTitle] {
+            subview.translatesAutoresizingMaskIntoConstraints = false
+            contentView.addSubview(subview)
+        }
+        NSLayoutConstraint.activate([
+            cellImage.topAnchor.constraint(equalTo: contentView.topAnchor),
+            cellImage.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            cellImage.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            cellImage.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            cellTitle.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            cellTitle.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            cellTitle.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            cellTitle.heightAnchor.constraint(equalToConstant: 43)
+        ])
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("Create MainpageCollectionViewCell programmatically")
+    }
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        cellImage.image = nil
+        cellTitle.text = nil
+    }
 }

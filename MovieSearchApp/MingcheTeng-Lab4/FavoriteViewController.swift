@@ -11,32 +11,43 @@ import SystemConfiguration
 
 // This swift file is largely learned from lecture videos Lecture 10, a lab 4 demo, and lecture 7, how to use table view.
 class FavoriteViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-    
-    @IBOutlet weak var tableView: UITableView!
+
+    private let tableView = UITableView(frame: .zero, style: .plain)
     var favoriteList:[StoredMovie] = []
     var favoriteImageList:[UIImage] = []
     var movieList:[Movie] = []
-    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return favoriteList.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .default, reuseIdentifier: "fav")
+        let cell = tableView.dequeueReusableCell(withIdentifier: "fav", for: indexPath)
         cell.textLabel?.text = favoriteList[indexPath.row].title
         return cell
     }
-    
+
     func setupTableView(){
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "fav")
         tableView.delegate = self
         tableView.dataSource = self
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        getDataFromDB()
+        title = "My Favorite Movies"
+        view.backgroundColor = .systemBackground
+        view.addSubview(tableView)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        let safeArea = view.safeAreaLayoutGuide
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: safeArea.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor)
+        ])
         setupTableView()
+        getDataFromDB()
         NotificationCenter.default.addObserver(self, selector: #selector(self.refresh), name: NSNotification.Name(rawValue: "newDataNotif"), object: nil)
 //        print("fav loaded")
     }
@@ -46,7 +57,7 @@ class FavoriteViewController: UIViewController, UITableViewDelegate, UITableView
         self.getDataFromDB() // a refresh the tableView.
 
     }
-    
+
     func getDataFromDB(){
         let queryMovie = UserDefaults.standard.array(forKey: "movieDB") as? [Data] ?? []
         let queryImage = UserDefaults.standard.array(forKey: "movieImageDB") as? [NSData]  ?? []
@@ -63,27 +74,11 @@ class FavoriteViewController: UIViewController, UITableViewDelegate, UITableView
         }
         tableView.reloadData()
     }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "favToDetailed"{
-            let detailedVC = segue.destination as! DetailedViewController_fav
-            detailedVC.movie = movieList[sender as! Int]
-            detailedVC.movieImage = favoriteImageList[sender as! Int]
-        }
-    }
-    
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        performSegue(withIdentifier: "favToDetailed", sender: indexPath.row)
+        tableView.deselectRow(at: indexPath, animated: true)
+        let detail = DetailedViewController_fav(movie: movieList[indexPath.row],
+                                                image: favoriteImageList[indexPath.row])
+        navigationController?.pushViewController(detail, animated: true)
     }
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

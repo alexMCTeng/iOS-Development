@@ -11,46 +11,57 @@ import UIKit
 // This swift file is used to display the detailed info of a movie.
 class DetailedViewController: UIViewController {
 
-    @IBOutlet weak var detailedImage: UIImageView!
-    @IBOutlet weak var detailedTitle: UILabel!
-    @IBOutlet weak var favoriteLabel: UILabel!
-    @IBOutlet weak var favoriteBtn: UIButton!
-    
-    var movie: Movie!
-    var isFav: Bool!
-    var movieImage: UIImage?
-    @IBOutlet weak var rating: UILabel!
-    @IBOutlet weak var overview: UILabel!
-    @IBOutlet weak var date: UILabel!
-    
-    required init?(coder: NSCoder) {
-        super.init(coder:coder)
+    private let detailView = MovieDetailView()
+    private var detailedImage: UIImageView { detailView.posterView }
+    private var detailedTitle: UILabel { detailView.titleLabel }
+    private var favoriteLabel: UILabel { detailView.favoriteLabel }
+    private var favoriteBtn: UIButton { detailView.favoriteButton }
+    private var rating: UILabel { detailView.ratingLabel }
+    private var overview: UILabel { detailView.overviewLabel }
+    private var date: UILabel { detailView.dateLabel }
+
+    let movie: Movie
+    private let movieImage: UIImage?
+    private var isFav = false
+
+    init(movie: Movie, image: UIImage? = nil) {
+        self.movie = movie
+        self.movieImage = image
+        super.init(nibName: nil, bundle: nil)
     }
-    
+
+    required init?(coder: NSCoder) {
+        fatalError("Create movie detail controllers with init(movie:image:)")
+    }
+
+    override func loadView() {
+        view = detailView
+    }
+
     // Learned how to use observer https://stackoverflow.com/questions/54146841/swift-ios-how-to-update-using-observers
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        favoriteBtn.addTarget(self, action: #selector(addToFavorite(_:)), for: .touchUpInside)
         setupDetailedView()
         NotificationCenter.default.addObserver(self, selector: #selector(self.refresh), name: Notification.Name(rawValue: "changeFavInDetail_fav"), object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.pushBack), name: Notification.Name(rawValue: "changeSettingPushBack"), object: nil)
     }
-    
+
     @objc func refresh(){
         navigationController?.popViewController(animated: true)
     }
-    
+
     @objc func pushBack(){
         navigationController?.popViewController(animated: true)
     }
-    
+
     func setupDetailedView(){
-        self.rating.text! = String(self.movie.vote_average)
+        self.rating.text = String(format: "%.1f", self.movie.vote_average)
         self.rating.textColor = UIColor.red
         self.overview.text = self.movie.overview
         self.date.text = self.movie.release_date
         self.detailedTitle.text = self.movie.title
-        
+
         if let imageFromFav = movieImage{
             self.detailedImage.image = imageFromFav
         } else{
@@ -70,7 +81,7 @@ class DetailedViewController: UIViewController {
         }
         self.isInFavorite()
     }
-    
+
     func isInFavorite(){
         let favoriteMovieList = UserDefaults.standard.array(forKey:"movieDB") as? [Data] ?? []
         for eachData in favoriteMovieList{
@@ -78,30 +89,32 @@ class DetailedViewController: UIViewController {
             if tempDecoded!.title == movie.title{
                 self.isFav = true
                 favoriteLabel.text = "Remove"
+                favoriteBtn.accessibilityLabel = "Remove from Favorite"
                 favoriteBtn.setImage(UIImage(systemName: "star.fill"), for: .normal)
                 return
             }
         }
         self.isFav = false
         favoriteLabel.text = "Add to Favorite"
+        favoriteBtn.accessibilityLabel = "Add to Favorite"
         favoriteBtn.setImage(UIImage(systemName: "star"), for: .normal)
     }
-    
+
     // Learned save data locally: https://stackoverflow.com/questions/28628225/how-to-save-local-data-in-a-swift-app
     // On piazza, head TA mentioned we can convert image to coredata then save. https://piazza.com/class/keyacd8h3denm?cid=296
     // learned how to convert, archive, and unarchived from https://stackoverflow.com/questions/29986957/save-custom-objects-into-nsuserdefaults
     // Learned how to update database and ask another view controller to reload from https://stackoverflow.com/questions/25921623/how-to-reload-tableview-from-another-view-controller-in-swift
     // and https://stackoverflow.com/questions/54146841/swift-ios-how-to-update-using-observers
-    @IBAction func addToFavorite(_ sender: UIButton) {
+    @objc func addToFavorite(_ sender: UIButton) {
         if isFav == false{
             let rawImageData = detailedImage.image
             // Learned how to reduce image quality from https://stackoverflow.com/questions/29726643/how-to-compress-of-reduce-the-size-of-an-image-before-uploading-to-parse-as-pffi/29726675
             // in order to avoid some images are too large to store by UserDefaults
             let nsImageData = rawImageData!.jpegData(compressionQuality: 0.2)! as NSData
-            
+
             let tempData = StoredMovie(movieId: movie.id, moviePoster: movie.poster_path, movieTitle: movie.title, movieDate: movie.release_date, movieRating: movie.vote_average, movieOverview: movie.overview, movieVote: movie.vote_count)
             let encodedData = try! NSKeyedArchiver.archivedData(withRootObject: tempData, requiringSecureCoding: true)
-            
+
             var favMovieList = UserDefaults.standard.array(forKey: "movieDB") as? [Data] ?? []
             var favMovieImageList = UserDefaults.standard.array(forKey: "movieImageDB") as? [NSData] ?? []
             favMovieList.append(encodedData)
@@ -109,6 +122,7 @@ class DetailedViewController: UIViewController {
             UserDefaults.standard.set(favMovieList, forKey: "movieDB")
             UserDefaults.standard.set(favMovieImageList, forKey: "movieImageDB")
             favoriteLabel.text = "Remove"
+            favoriteBtn.accessibilityLabel = "Remove from Favorite"
             favoriteBtn.setImage(UIImage(systemName: "star.fill"), for: .normal)
 //            print("successfully added to favorite")
             isFav = true
@@ -124,6 +138,7 @@ class DetailedViewController: UIViewController {
                     UserDefaults.standard.set(favMovieImageList, forKey: "movieImageDB")
                     isFav = false
                     favoriteLabel.text = "Add to Favorite"
+                    favoriteBtn.accessibilityLabel = "Add to Favorite"
                     favoriteBtn.setImage(UIImage(systemName: "star"), for: .normal)
 //                    print("remove successfully")
                     NotificationCenter.default.post(name: NSNotification.Name(rawValue: "changeFavInDetail"), object: nil)
@@ -135,16 +150,8 @@ class DetailedViewController: UIViewController {
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: "changeFavInDetail"), object: nil)
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: "newDataNotif"), object: nil)
     }
-    
-    /*
-    // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
+
 
 }
 
@@ -154,14 +161,14 @@ class DetailedViewController: UIViewController {
  */
 class StoredMovie: NSObject, NSCoding, Codable, NSSecureCoding{
     static var supportsSecureCoding: Bool = true
-    
+
     func encode(with coder: NSCoder) {
         coder.encode(title, forKey: "movieTitle")
         coder.encode(overview, forKey: "movieOverview")
         coder.encode(vote_average, forKey: "movieRating")
         coder.encode(release_date, forKey: "movieDate")
     }
-    
+
     init(movieId: Int, moviePoster: String?, movieTitle: String, movieDate:String, movieRating: Double, movieOverview: String, movieVote: Int!) {
         self.id = movieId
         self.poster_path = moviePoster
@@ -171,7 +178,7 @@ class StoredMovie: NSObject, NSCoding, Codable, NSSecureCoding{
         self.overview = movieOverview
         self.vote_count = movieVote
     }
-    
+
     required init?(coder: NSCoder) {
         id = coder.decodeObject(forKey: "movidId") as? Int
         poster_path = coder.decodeObject(forKey: "movieDate") as? String
@@ -181,7 +188,7 @@ class StoredMovie: NSObject, NSCoding, Codable, NSSecureCoding{
         release_date = coder.decodeObject(forKey: "movieDate") as? String
         vote_count = coder.decodeObject(forKey: "movieVote") as? Int
     }
-    
+
     var id: Int!
     var poster_path: String?
     var title: String!
@@ -189,8 +196,8 @@ class StoredMovie: NSObject, NSCoding, Codable, NSSecureCoding{
     var vote_average: Double!
     var release_date:String!
     var vote_count: Int!
-    
-    
+
+
 }
 
 /*
