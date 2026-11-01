@@ -36,6 +36,22 @@ final class ProgrammaticUITests: XCTestCase {
 
     private var poster: UIImage { UIImage(named: "error")! }
 
+    func testMissingAPIConfigurationShowsEmptyStateWithoutLoading() throws {
+        guard TMDBConfiguration.apiKey == nil else {
+            throw XCTSkip("Run with TMDB_API_KEY= to exercise an unconfigured checkout.")
+        }
+        let controller = ViewController()
+        controller.loadViewIfNeeded()
+        XCTAssertFalse(controller.isLoading)
+        XCTAssertFalse(settingPass.shareInstance.isLoading)
+        XCTAssertTrue(controller.theDataResult.isEmpty)
+        let search = try XCTUnwrap(descendants(controller.view, of: UISearchBar.self).first)
+        XCTAssertFalse(search.searchTextField.isEnabled)
+        XCTAssertTrue(descendants(controller.view, of: UILabel.self).contains {
+            $0.text == "Movie service is not configured."
+        })
+    }
+
     private func descendants<T: UIView>(_ view: UIView, of type: T.Type) -> [T] {
         if let match = view as? T { return [match] }
         return view.subviews.flatMap { descendants($0, of: type) }

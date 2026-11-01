@@ -146,7 +146,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
      Network reachability is learned from: https://www.youtube.com/watch?v=AoSGcDNmbxo
      I have this creative idea since the suggested creative idea on piazza which recommend us to store everything on local device so users can see their favorite movie detailed info even when they are out of Internet Service.
      */
-    private let reachability = SCNetworkReachabilityCreateWithName(nil, "https://api.themoviedb.org/3/movie/76341?api_key=00000000000000000000000000000000")
+    private let reachability = SCNetworkReachabilityCreateWithName(nil, "api.themoviedb.org")
 
     private func checkReachability(){
         var flag = SCNetworkReachabilityFlags()
@@ -200,6 +200,21 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         setupCollectionView()
+        NotificationCenter.default.addObserver(self, selector: #selector(settingSetup), name: Notification.Name(rawValue: "changeSetting"), object: nil)
+        let interaction = UIContextMenuInteraction(delegate: self)
+        view.addInteraction(interaction)
+        guard TMDBConfiguration.apiKey != nil else {
+            isLoading = false
+            settingPass.shareInstance.isLoading = false
+            theSearchBar.searchTextField.isEnabled = false
+            let message = UILabel()
+            message.text = "Movie service is not configured."
+            message.textAlignment = .center
+            message.numberOfLines = 0
+            message.textColor = .secondaryLabel
+            collectionView.backgroundView = message
+            return
+        }
         checkReachability()
         self.searchSpinner.isHidden = false
         self.searchSpinner.startAnimating()
@@ -215,14 +230,11 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
                 settingPass.shareInstance.isLoading = false
             }
         }
-        // Learned how to use observer https://stackoverflow.com/questions/54146841/swift-ios-how-to-update-using-observers
-        NotificationCenter.default.addObserver(self, selector: #selector(settingSetup), name: Notification.Name(rawValue: "changeSetting"), object: nil)
-        let interaction = UIContextMenuInteraction(delegate: self)
-        view.addInteraction(interaction)
     }
 
     // A function that set the language and adult content variables, then to perfrom query.
     @objc func settingSetup(){
+        guard TMDBConfiguration.apiKey != nil else { return }
         checkReachability()
         if(isConnected == true){
             isLoading = true
@@ -284,9 +296,9 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     Initically, we load some movies to display in mainpage
     */
     func getMovieData(page: Int){
+        guard let apiKey = TMDBConfiguration.apiKey else { return }
         checkReachability()
         if(isConnected == true){
-            let apiKey = "00000000000000000000000000000000"
             let url = URL(string: "https://api.themoviedb.org/3/discover/movie?api_key=\(apiKey)&include_adult=\(adultContent)&page=\(page)&language=\(curLanguage)&sort_by=popularity.desc")
             guard let data = try? Data(contentsOf: url!) else { return  }
             let tempResult = [try? JSONDecoder().decode(APIResults.self, from: data)]
@@ -355,6 +367,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     // The source of error image: https://www.iconsdb.com/red-icons/error-4-icon.html
     // The function is suggested by lecture video 10.
     func cacheImage(page: Int){
+        guard theDataResult.indices.contains(page - 1) else { return }
         checkReachability()
         if isConnected == true{
 //            print(theDataResult)
@@ -385,6 +398,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     // Learned from https://www.raywenderlich.com/4363809-uisearchcontroller-tutorial-getting-started
     // Learned spinner from https://stackoverflow.com/questions/28865659/hide-activity-indicator
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        guard let apiKey = TMDBConfiguration.apiKey else { return }
         checkReachability()
         if isConnected == true && isLoading == false{
             let searchText = theSearchBar.text?.replacingOccurrences(of: " ", with: "+")
@@ -398,9 +412,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
                 isSearching = true
                 searchSpinner.isHidden = false
                 searchSpinner.startAnimating()
-                let apiKey = "00000000000000000000000000000000"
                 let url = URL(string: "https://api.themoviedb.org/3/search/movie?api_key=\(apiKey)&query=\(searchText!)&include_adult=\(self.adultContent)&language=\(self.curLanguage)")
-//                print(url)
                 let data = try? Data(contentsOf: url!)
                 let tempResult = [try? JSONDecoder().decode(APIResults.self, from: data!)]
                 self.theDataResult = tempResult

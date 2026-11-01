@@ -1,0 +1,2 @@
+# Local API credentials; commit only Secrets.example.xcconfig.
+/Configuration/Secrets.xcconfig

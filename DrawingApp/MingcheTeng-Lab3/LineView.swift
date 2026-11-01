@@ -17,6 +17,7 @@ class LineView: UIView {
      */
     override init(frame: CGRect) {
         super.init(frame: frame)
+        print("canvas just init")
         backgroundColor = UIColor.clear
     }
     

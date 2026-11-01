@@ -71,6 +71,7 @@
 		B0C3C4CC2541B2DB009385AE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B0C3C4CA2541B2DB009385AE /* LaunchScreen.storyboard */; };
 		B0DF0E63254E8CA300180096 /* DetailedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0DF0E62254E8CA300180096 /* DetailedViewController.swift */; };
 		AA0000010000000000000001 /* MovieDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000010000000000000002 /* MovieDetailView.swift */; };
+		AA0000030000000000000001 /* TMDBConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000030000000000000002 /* TMDBConfiguration.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -90,6 +91,8 @@
 		B0C3C4CD2541B2DB009385AE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B0DF0E62254E8CA300180096 /* DetailedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailedViewController.swift; sourceTree = "<group>"; };
 		AA0000010000000000000002 /* MovieDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDetailView.swift; sourceTree = "<group>"; };
+        AA0000030000000000000002 /* TMDBConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMDBConfiguration.swift; sourceTree = "<group>"; };
+        AA0000030000000000000003 /* App.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Configuration/App.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,6 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				B0C3C4BE2541B2DA009385AE /* MingcheTeng-Lab4 */,
+                AA0000030000000000000003 /* App.xcconfig */,
                 AA0000020000000000000002 /* ProgrammaticUITests.swift */,
 				B0C3C4BD2541B2DA009385AE /* Products */,
 			);
@@ -129,6 +133,7 @@
 				B0C3C4C32541B2DA009385AE /* ViewController.swift */,
 				B0DF0E62254E8CA300180096 /* DetailedViewController.swift */,
 				AA0000010000000000000002 /* MovieDetailView.swift */,
+                AA0000030000000000000002 /* TMDBConfiguration.swift */,
 				B080C29325485B8600701743 /* MainpageCollectionViewCell.swift */,
 				B06EF5712542C5D600A8ECDF /* APIResults.swift */,
 				B06EF5732542C64300A8ECDF /* Movie.swift */,
@@ -217,6 +222,7 @@
 				B006A0C525517B9F00A07CD4 /* settings.swift in Sources */,
 				B0DF0E63254E8CA300180096 /* DetailedViewController.swift in Sources */,
 				AA0000010000000000000001 /* MovieDetailView.swift in Sources */,
+                AA0000030000000000000001 /* TMDBConfiguration.swift in Sources */,
 				B080C29425485B8600701743 /* MainpageCollectionViewCell.swift in Sources */,
 				B0C3C4C42541B2DA009385AE /* ViewController.swift in Sources */,
 				B0C3C4C02541B2DA009385AE /* AppDelegate.swift in Sources */,
@@ -360,6 +366,7 @@
 		};
 		B0C3C4D12541B2DB009385AE /* Debug */ = {
 			isa = XCBuildConfiguration;
+            baseConfigurationReference = AA0000030000000000000003 /* App.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -379,6 +386,7 @@
 		};
 		B0C3C4D22541B2DB009385AE /* Release */ = {
 			isa = XCBuildConfiguration;
+            baseConfigurationReference = AA0000030000000000000003 /* App.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;

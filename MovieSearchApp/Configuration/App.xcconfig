@@ -1,0 +1,4 @@
+// Shared by the app target's Debug and Release configurations.
+// An empty value allows fresh checkouts to build without a credential.
+TMDB_API_KEY =
+#include? "Secrets.xcconfig"

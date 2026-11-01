@@ -28,8 +28,12 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
             return true
         } else{
             var tempBoolean = true
+            print("replacementString: \(string)")
+            print("range: \(range)")
             let r = Range(range, in: textField.text!)
+            print("r: \(String(describing: r))")
             let newText = textField.text!.replacingCharacters(in: r!, with: string)
+            print("newText: \(newText)")
             // In order to allow only number and decimal point, we can use inverted CharacterSet, that is, the original characterSet is [0-9] and .
             // then inverted it, then use string.rangeOfCharacer(from: ) == nil, if the return is true, means the input is not a character but [0-9] or a dot
             // Learn from :
