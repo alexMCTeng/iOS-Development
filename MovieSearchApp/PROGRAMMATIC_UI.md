@@ -4,7 +4,7 @@
 
 ## Where to change layout
 
-- `ViewController.swift`: movie grid, search field, loading indicators, and safe-area constraints in `setupMainPageLayout()`. The flow layout retains the 179 × 187 cell size, 10-point spacing, and centered rows.
+- `ViewController.swift`: movie grid, search field, loading indicators, and safe-area constraints in `setupMainPageLayout()`. The grid uses `MovieGridLayout.swift`: 179 × 187 is the preferred cell size, with 10-point spacing and centered rows. Cells shrink to retain two columns when the usable width is at least 290 points. Wider layouts can show more columns, and exceptionally narrow layouts use one. Metrics are recalculated during layout rather than cached in the controller.
 - `MainpageCollectionViewCell.swift`: poster and two-line title overlay, built in `init(frame:)` and registered by the movie list.
 - `MovieDetailView.swift`: shared scrollable layout for both detail controllers. Change `contentMargin` (20 points), stack spacing (16 points), and the poster constraints here.
 - `FavoriteViewController.swift`: table pinned to the safe area.

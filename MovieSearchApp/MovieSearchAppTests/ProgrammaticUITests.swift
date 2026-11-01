@@ -86,6 +86,47 @@ final class ProgrammaticUITests: XCTestCase {
         XCTAssertNil(cell.cellTitle.text)
     }
 
+    func testMovieGridKeepsTwoColumnsThroughRepeatedRotationWidths() throws {
+        guard TMDBConfiguration.apiKey == nil else {
+            throw XCTSkip("Run with TMDB_API_KEY= to test layout without network requests.")
+        }
+        let controller = ViewController()
+        controller.loadViewIfNeeded()
+        controller.isLoading = true // Prevent pagination while laying out local fixtures.
+        controller.theImageCache = Array(repeating: poster, count: 12)
+        controller.theMovieTitle = Array(repeating: movie.title, count: 12)
+        controller.theMovieList = Array(repeating: movie, count: 12)
+        let collection = try XCTUnwrap(descendants(controller.view, of: UICollectionView.self).first)
+        collection.reloadData()
+        // Include narrow and fractional widths encountered during animated resizing.
+        for width: CGFloat in [375, 360, 320, 844, 367.5, 375, 360, 768, 320] {
+            controller.view.frame = CGRect(x: 0, y: 0, width: width, height: 600)
+            controller.view.setNeedsLayout()
+            controller.view.layoutIfNeeded()
+            collection.layoutIfNeeded()
+            let first = try XCTUnwrap(collection.layoutAttributesForItem(at: IndexPath(item: 0, section: 0)))
+            let second = try XCTUnwrap(collection.layoutAttributesForItem(at: IndexPath(item: 1, section: 0)))
+            XCTAssertEqual(first.frame.minY, second.frame.minY, accuracy: 0.5, "Width: \(width)")
+            XCTAssertGreaterThanOrEqual(second.frame.minX - first.frame.maxX, 9.5)
+            XCTAssertLessThanOrEqual(second.frame.maxX, collection.bounds.width + 0.5)
+        }
+        XCTAssertEqual(collection.contentInsetAdjustmentBehavior, .never)
+        // Insets can change after the bounds settle during a transition.
+        for inset: CGFloat in [12, 0, 12, 0] {
+            collection.contentInset = UIEdgeInsets(top: 0, left: inset, bottom: 0, right: inset)
+            collection.layoutIfNeeded()
+            let first = try XCTUnwrap(collection.layoutAttributesForItem(at: IndexPath(item: 0, section: 0)))
+            let second = try XCTUnwrap(collection.layoutAttributesForItem(at: IndexPath(item: 1, section: 0)))
+            XCTAssertEqual(first.frame.minY, second.frame.minY, accuracy: 0.5)
+            XCTAssertLessThanOrEqual(second.frame.maxX, collection.bounds.width - 2 * inset + 0.5)
+        }
+        controller.theImageCache = [poster]
+        collection.reloadData()
+        collection.layoutIfNeeded()
+        let single = try XCTUnwrap(collection.layoutAttributesForItem(at: IndexPath(item: 0, section: 0)))
+        XCTAssertEqual(single.frame.midX, collection.bounds.width / 2, accuracy: 0.5)
+    }
+
     func testBothDetailScreensLoadWithoutOutletsAndScrollAtDifferentSizes() throws {
         let controllers: [UIViewController] = [
             DetailedViewController(movie: movie, image: poster),

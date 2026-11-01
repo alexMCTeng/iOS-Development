@@ -20,11 +20,13 @@ CI should obtain the key from its secret store and create the ignored configurat
 
 ## Existing key and Git history
 
-The previous key was already committed locally before this change. It has been moved to the ignored local configuration to preserve local behavior, but **it has not been rotated or revoked**.
+The previous key was committed before it was removed from source. On 2026-11-01, the repository history was rewritten and the cleaned `master` branch was pushed to GitHub. The replacement key is stored only in the ignored local configuration.
 
-Replacing the current source does not erase older commits. Before making that history public, invalidate/rotate the old credential with TMDb and update the local configuration with the replacement. If it was already publicly pushed, treat it as exposed. Start at your [TMDb API settings](https://www.themoviedb.org/settings/api); use TMDb support if your account does not offer a reset/revoke option.
+Rotation was verified with fresh requests to TMDb's `/3/authentication` endpoint: the exposed key returned **401**, while the replacement returned **200** with `success: true`. Missing-key and invalid-key controls also returned 401. When checking future rotations, use this validation endpoint with a unique query parameter to avoid reusing an earlier cached response.
 
-If you also want to remove the old value from history, follow [GitHub's sensitive-data removal guide](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository). Coordinate any history rewrite with collaborators. This change does not rewrite history or push anything. The Git repository currently spans the parent `iOSDevelopment` directory, not just this app.
+For future exposures, replacing current source does not erase older commits. Invalidate/rotate the exposed credential with TMDb and update the local configuration with its replacement. Start at your [TMDb API settings](https://www.themoviedb.org/settings/api); use TMDb support if your account does not offer a reset/revoke option.
+
+For history cleanup, follow [GitHub's sensitive-data removal guide](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository). Coordinate rewrites with collaborators: older clones should be replaced or carefully cleaned to avoid reintroducing the old history. Forks and cached GitHub views may retain historical copies, so credential revocation is essential. The Git repository spans the parent `iOSDevelopment` directory, not just this app.
 
 ## Repository privacy versus app security
 

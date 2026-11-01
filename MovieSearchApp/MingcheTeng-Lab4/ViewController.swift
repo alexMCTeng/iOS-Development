@@ -43,7 +43,7 @@
 import UIKit
 import SystemConfiguration
 
-class ViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UISearchBarDelegate, UIContextMenuInteractionDelegate, UICollectionViewDelegateFlowLayout {
+class ViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UISearchBarDelegate, UIContextMenuInteractionDelegate {
 
     // Implement the context menu for extra credit,
     // Learned context menu from https://stackoverflow.com/questions/61158026/how-to-know-which-uicollectionview-cell-is-triggered-for-context-menu-on-ios-13
@@ -177,13 +177,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     private let searchSpinner = UIActivityIndicatorView(style: .large)
     private let mainPageSpinner = UIActivityIndicatorView(style: .medium)
     private let theSearchBar = UISearchBar()
-    private let collectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        layout.itemSize = CGSize(width: 179, height: 187)
-        layout.minimumLineSpacing = 10
-        layout.minimumInteritemSpacing = 10
-        return UICollectionView(frame: .zero, collectionViewLayout: layout)
-    }()
+    private let collectionView = UICollectionView(frame: .zero, collectionViewLayout: MovieGridLayout())
     var theDataResult: [APIResults?] = []
     var theImageCache:[UIImage] = []
     var theMovieTitle:[String] = []
@@ -194,7 +188,6 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     var curLanguage:String = "en-US"
     var isSearching:Bool = false
     var isLoading:Bool = true
-    private var previousCollectionViewWidth: CGFloat = 0
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -308,6 +301,8 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
 
     func setupCollectionView(){
         collectionView.backgroundColor = .systemBackground
+        // The view is already constrained to the safe area; do not inset it again.
+        collectionView.contentInsetAdjustmentBehavior = .never
         collectionView.keyboardDismissMode = .onDrag
         collectionView.alwaysBounceVertical = true
         collectionView.register(MainpageCollectionViewCell.self,
@@ -358,10 +353,10 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         super.viewDidLayoutSubviews()
         searchSpinner.frame = collectionView.bounds
 
-        if previousCollectionViewWidth != collectionView.bounds.width {
-            previousCollectionViewWidth = collectionView.bounds.width
-            collectionView.collectionViewLayout.invalidateLayout()
-        }
+    }
+
+    func scrollViewDidChangeAdjustedContentInset(_ scrollView: UIScrollView) {
+        collectionView.collectionViewLayout.invalidateLayout()
     }
 
     // The source of error image: https://www.iconsdb.com/red-icons/error-4-icon.html
@@ -494,20 +489,4 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         navigationController?.pushViewController(detail, animated: true)
     }
 
-    // Center cells horizontally in the collection view
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        let numberOfItems = self.collectionView(collectionView, numberOfItemsInSection: section)
-        guard numberOfItems > 0 else { return .zero }
-        let flowLayout = collectionViewLayout as! UICollectionViewFlowLayout
-        let itemSpacing = flowLayout.minimumInteritemSpacing
-        let itemWidth = flowLayout.itemSize.width
-        let availableWidth = collectionView.bounds.width - collectionView.adjustedContentInset.left - collectionView.adjustedContentInset.right
-        let itemsPerRow = max(Int((availableWidth + itemSpacing) / (itemWidth + itemSpacing)), 1)
-        let visibleItemsInRow = min(numberOfItems, itemsPerRow)
-        let totalCellWidth = itemWidth * CGFloat(visibleItemsInRow)
-        let totalSpacingWidth = itemSpacing * CGFloat(max(visibleItemsInRow - 1, 0))
-        let totalWidth = totalCellWidth + totalSpacingWidth
-        let inset = max((availableWidth - totalWidth) / 2, 0)
-        return UIEdgeInsets(top: flowLayout.sectionInset.top, left: inset, bottom: flowLayout.sectionInset.bottom, right: inset)
-    }
 }
