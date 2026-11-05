@@ -31,6 +31,16 @@ extension SKNode {
 
 class GameViewController: UIViewController {
 
+    override func loadView() {
+        let skView = SKView(frame: .zero)
+        skView.backgroundColor = .black
+        view = skView
+    }
+
+    override var prefersStatusBarHidden: Bool {
+        return true
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 

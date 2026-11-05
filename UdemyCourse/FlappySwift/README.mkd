@@ -2,7 +2,12 @@
 
 # FlappySwift
 
-An implementation of Flappy Bird in Swift for iOS 8.
+An implementation of Flappy Bird in Swift for iOS 15 and later.
+
+The app uses programmatic UIKit: `AppDelegate` creates the window and its
+`GameViewController`, which creates an `SKView` in `loadView()`. SpriteKit loads
+`GameScene.sks` and runs the existing game logic in `GameScene.swift`.
+`LaunchScreen.storyboard` is used only for the system launch screen.
 
 ![FlappySwift](http://i.imgur.com/1NLoToU.gif)
 

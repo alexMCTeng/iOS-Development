@@ -7,29 +7,43 @@
 //
 
 import XCTest
+import SpriteKit
+@testable import FlappyBird
 
+@MainActor
 class FlappyBirdTests: XCTestCase {
-    
-    override func setUp() {
-        super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+
+    func testApplicationLaunchesWithProgrammaticGameController() throws {
+        let delegate = try XCTUnwrap(UIApplication.shared.delegate as? AppDelegate)
+        let window = try XCTUnwrap(delegate.window)
+        let controller = try XCTUnwrap(window.rootViewController as? GameViewController)
+
+        XCTAssertFalse(window.isHidden)
+        XCTAssertNil(Bundle.main.object(forInfoDictionaryKey: "UIMainStoryboardFile"))
+        XCTAssertNil(controller.storyboard)
+        controller.loadViewIfNeeded()
+        let skView = try XCTUnwrap(controller.view as? SKView)
+        XCTAssertTrue(skView.scene is GameScene)
+        XCTAssertTrue(controller.prefersStatusBarHidden)
     }
-    
-    override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-        super.tearDown()
+
+    func testGameControllerCreatesAndKeepsItsScene() throws {
+        let controller = GameViewController()
+        controller.loadViewIfNeeded()
+        let skView = try XCTUnwrap(controller.view as? SKView)
+        let scene = try XCTUnwrap(skView.scene as? GameScene)
+
+        XCTAssertEqual(scene.scaleMode, .aspectFill)
+        XCTAssertTrue(skView.ignoresSiblingOrder)
+        XCTAssertTrue(skView.showsFPS)
+        XCTAssertTrue(skView.showsNodeCount)
+        XCTAssertNotNil(scene.bird)
+        XCTAssertNotNil(scene.scoreLabelNode)
+
+        skView.frame = CGRect(x: 0, y: 0, width: 844, height: 390)
+        skView.setNeedsLayout()
+        skView.layoutIfNeeded()
+        XCTAssertTrue(skView.scene === scene)
+        skView.presentScene(nil)
     }
-    
-    func testExample() {
-        // This is an example of a functional test case.
-        XCTAssert(true, "Pass")
-    }
-    
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure() {
-            // Put the code you want to measure the time of here.
-        }
-    }
-    
 }
