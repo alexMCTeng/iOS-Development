@@ -202,7 +202,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate{
         scoreLabelNode.text = String(score)
         
         // Restart animation
-        moving.speed = 1
+        moving.speed = 2
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if moving.speed > 0  {

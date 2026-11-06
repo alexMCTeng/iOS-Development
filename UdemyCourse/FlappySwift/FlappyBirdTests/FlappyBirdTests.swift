@@ -13,11 +13,16 @@ import SpriteKit
 @MainActor
 class FlappyBirdTests: XCTestCase {
 
-    func testApplicationLaunchesWithProgrammaticGameController() throws {
-        let delegate = try XCTUnwrap(UIApplication.shared.delegate as? AppDelegate)
+    func testApplicationLaunchesWithSceneLifecycleAndProgrammaticGameController() throws {
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first { $0.delegate is SceneDelegate })
+        let delegate = try XCTUnwrap(scene.delegate as? SceneDelegate)
         let window = try XCTUnwrap(delegate.window)
         let controller = try XCTUnwrap(window.rootViewController as? GameViewController)
 
+        XCTAssertTrue(window.windowScene === scene)
+        XCTAssertNil(scene.session.configuration.storyboard)
         XCTAssertFalse(window.isHidden)
         XCTAssertNil(Bundle.main.object(forInfoDictionaryKey: "UIMainStoryboardFile"))
         XCTAssertNil(controller.storyboard)
