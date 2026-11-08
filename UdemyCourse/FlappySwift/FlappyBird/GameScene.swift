@@ -205,16 +205,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate{
         moving.speed = 2
     }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if moving.speed > 0  {
-            for _ in touches { // do we need all touches?
-                bird.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
-                bird.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 30))
-            }
-        } else if canRestart {
-            self.resetScene()
+        if !touches.isEmpty {
+            performPrimaryAction()
         }
     }
-    
+
+    /// Shared by touch and hinge input, including tap-to-restart after game over.
+    func performPrimaryAction() {
+        if moving.speed > 0 {
+            bird.physicsBody?.velocity = .zero
+            bird.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 30))
+        } else if canRestart {
+            resetScene()
+        }
+    }
+
     override func update(_ currentTime: TimeInterval) {
         /* Called before each frame is rendered */
         let value = bird.physicsBody!.velocity.dy * ( bird.physicsBody!.velocity.dy < 0 ? 0.003 : 0.001 )

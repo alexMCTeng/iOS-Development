@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AF0A11012026110600000003 /* FoldJumpDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF0A11012026110600000004 /* FoldJumpDetector.swift */; };
 		AF0A11012026110600000001 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF0A11012026110600000002 /* SceneDelegate.swift */; };
 		43745200193D163700654986 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437451FF193D163700654986 /* AppDelegate.swift */; };
 		43745202193D163700654986 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 43745201193D163700654986 /* GameScene.sks */; };
@@ -30,6 +31,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AF0A11012026110600000004 /* FoldJumpDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoldJumpDetector.swift; sourceTree = "<group>"; };
 		AF0A11012026110600000002 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		437451FA193D163700654986 /* FlappyBird.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FlappyBird.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		437451FE193D163700654986 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -91,6 +93,7 @@
 				AF0A11012026110600000002 /* SceneDelegate.swift */,
 				43745201193D163700654986 /* GameScene.sks */,
 				43745203193D163800654986 /* GameScene.swift */,
+				AF0A11012026110600000004 /* FoldJumpDetector.swift */,
 				43745205193D163800654986 /* GameViewController.swift */,
 				43745207193D163800654986 /* Main.storyboard */,
 				4374520A193D163800654986 /* Images.xcassets */,
@@ -232,6 +235,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				43745204193D163800654986 /* GameScene.swift in Sources */,
+				AF0A11012026110600000003 /* FoldJumpDetector.swift in Sources */,
 				43745206193D163800654986 /* GameViewController.swift in Sources */,
 				43745200193D163700654986 /* AppDelegate.swift in Sources */,
 				AF0A11012026110600000001 /* SceneDelegate.swift in Sources */,
@@ -318,6 +322,7 @@
 				METAL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

@@ -13,6 +13,38 @@ is used only for the system launch screen.
 
 ![FlappySwift](http://i.imgur.com/1NLoToU.gif)
 
+# Fold controls and testing
+
+On iOS 27.1 or later, `UIHingeInteraction` feeds the device hinge angle into
+`FoldJumpDetector`. Open beyond 120° to arm a gesture, then close below 90° to
+perform the same action as a tap. Holding the angle below 90° does not repeat;
+open beyond 120° to arm again. A fold restarts a finished game just like a tap.
+Tap input remains available on all supported devices. Missing hinge data or
+leaving the active scene clears the pending gesture.
+
+For a Debug build running in a simulator, an on-screen panel shows the received
+angle, armed state, and fold-trigger count. It is not included in Release builds
+or on physical devices.
+
+1. Run the FlappyBird scheme on iPhone Duo.
+2. With **Fold test: off**, use Device Hub's fold controls. The **Device** readout
+   shows the angle actually delivered by UIKit. If an angle slider is available,
+   move it above 120°, then below 90°. A preset at exactly 90° will not trigger.
+3. If Device Hub only offers presets, tap **Fold test: off** to enable the app's
+   test controls. Press **130°**, then **80°**, or drag the test slider across
+   those thresholds. The **Test** readout and fold counter confirm each gesture.
+4. Repeat **80°**: no additional trigger. Press **130°**, then **80°** again:
+   exactly one additional trigger. If the bird has already died, the gesture
+   restarts the game; the next gesture makes it jump.
+5. Turn fold testing off to return to real device hinge events.
+
+The in-app test slider injects angle samples into the gameplay input path. It
+does not change the simulator's physical pose and does not verify UIKit's event
+delivery. It intentionally ignores live hinge input while enabled.
+
+Run **Product > Test** (Command-U) for threshold, rearming, missing-data,
+interaction-registration, and game-input regression tests.
+
 # Notes
 
 We're launching a course [Game Programming with Swift](https://fullstackedu.com)
