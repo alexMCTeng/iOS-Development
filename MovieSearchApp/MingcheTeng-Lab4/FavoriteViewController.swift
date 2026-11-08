@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import SystemConfiguration
 
 // This swift file is largely learned from lecture videos Lecture 10, a lab 4 demo, and lecture 7, how to use table view.
 class FavoriteViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {

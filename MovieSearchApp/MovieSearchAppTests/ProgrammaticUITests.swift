@@ -1,4 +1,5 @@
 import XCTest
+import Network
 @testable import MingcheTeng_Lab4
 
 @MainActor
@@ -7,6 +8,7 @@ final class ProgrammaticUITests: XCTestCase {
     private let keys = ["movieDB", "movieImageDB"]
     private var savedLanguage = "en-US"
     private var savedAdult = "true"
+    private var savedIsLoading = false
 
     override func setUp() {
         super.setUp()
@@ -16,6 +18,7 @@ final class ProgrammaticUITests: XCTestCase {
         }
         savedLanguage = settingPass.shareInstance.language
         savedAdult = settingPass.shareInstance.adultContent
+        savedIsLoading = settingPass.shareInstance.isLoading
     }
 
     override func tearDown() {
@@ -24,6 +27,7 @@ final class ProgrammaticUITests: XCTestCase {
         }
         settingPass.shareInstance.language = savedLanguage
         settingPass.shareInstance.adultContent = savedAdult
+        settingPass.shareInstance.isLoading = savedIsLoading
         super.tearDown()
     }
 
@@ -35,6 +39,48 @@ final class ProgrammaticUITests: XCTestCase {
     }
 
     private var poster: UIImage { UIImage(named: "error")! }
+
+    func testStartupWaitsForFirstPathUpdateWithoutOfflineAlert() {
+        let controller = NetworkStartupController()
+        XCTAssertEqual(controller.initialLoadCount, 0)
+        XCTAssertEqual(controller.offlineAlertCount, 0)
+
+        controller.handleNetworkPathUpdate(.satisfied)
+        XCTAssertEqual(controller.initialLoadCount, 1)
+        XCTAssertEqual(controller.offlineAlertCount, 0)
+    }
+
+    func testStartupRetriesWhenAnOfflinePathBecomesConnected() {
+        let controller = NetworkStartupController()
+        controller.handleNetworkPathUpdate(.unsatisfied)
+        XCTAssertEqual(controller.initialLoadCount, 0)
+        XCTAssertEqual(controller.offlineAlertCount, 1)
+        XCTAssertFalse(controller.isLoading)
+        XCTAssertFalse(settingPass.shareInstance.isLoading)
+
+        controller.handleNetworkPathUpdate(.satisfied)
+        XCTAssertEqual(controller.initialLoadCount, 1)
+    }
+
+    func testPathChangesDoNotRepeatInitialLoadOrShowStartupAlerts() {
+        let controller = NetworkStartupController()
+        for status: NWPath.Status in [.satisfied, .satisfied, .unsatisfied, .satisfied] {
+            controller.handleNetworkPathUpdate(status)
+        }
+        XCTAssertEqual(controller.initialLoadCount, 1)
+        XCTAssertEqual(controller.offlineAlertCount, 0)
+    }
+
+    func testCachedMovieDetailsOpenBeforeNetworkIsReady() {
+        let controller = NetworkStartupController()
+        let navigation = UINavigationController(rootViewController: controller)
+        controller.theMovieList = [movie]
+        controller.theImageCache = [poster]
+        controller.collectionView(UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout()),
+                                  didSelectItemAt: IndexPath(item: 0, section: 0))
+        XCTAssertTrue(navigation.topViewController is DetailedViewController)
+        XCTAssertEqual(controller.offlineAlertCount, 0)
+    }
 
     func testMissingAPIConfigurationShowsEmptyStateWithoutLoading() throws {
         guard TMDBConfiguration.apiKey == nil else {
@@ -213,5 +259,21 @@ final class ProgrammaticUITests: XCTestCase {
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)
+    }
+}
+
+private final class NetworkStartupController: ViewController {
+    var initialLoadCount = 0
+    var offlineAlertCount = 0
+
+    // Keep these tests independent of a live monitor, API key, and network.
+    override func viewDidLoad() {}
+
+    override func loadInitialMovies() {
+        initialLoadCount += 1
+    }
+
+    override func showNoConnectionAlert() {
+        offlineAlertCount += 1
     }
 }

@@ -41,7 +41,7 @@
 
 // This swift file is largely based on lecture 7 which contains materials of how to use collection view
 import UIKit
-import SystemConfiguration
+import Network
 
 class ViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UISearchBarDelegate, UIContextMenuInteractionDelegate {
 
@@ -143,37 +143,45 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     }
 
     /*
-     Network reachability is learned from: https://www.youtube.com/watch?v=AoSGcDNmbxo
-     I have this creative idea since the suggested creative idea on piazza which recommend us to store everything on local device so users can see their favorite movie detailed info even when they are out of Internet Service.
+     Network reachability uses NWPathMonitor from the Network framework (replaces deprecated SCNetworkReachability).
      */
-    private let reachability = SCNetworkReachabilityCreateWithName(nil, "api.themoviedb.org")
+    private let pathMonitor = NWPathMonitor()
+    private var hasStartedInitialLoad = false
 
-    private func checkReachability(){
-        var flag = SCNetworkReachabilityFlags()
-        SCNetworkReachabilityGetFlags(self.reachability!, &flag)
-        if isNetworkReachable(with:flag){
-            if flag.contains(.reachable){
-                isConnected = true
+    private func checkReachability() -> Bool {
+        guard pathMonitor.currentPath.status == .satisfied else {
+            // Loading methods also call this from background queues.
+            DispatchQueue.main.async { [weak self] in
+                self?.showNoConnectionAlert()
             }
-        }else{
-            isConnected = false
-            // Learned how to use alert on lab 3, here's the link I learned on lab 3 and this assignment: https://stackoverflow.com/questions/25511945/swift-alert-view-with-ok-and-cancel-which-button-tapped
-            let ac = UIAlertController(title: "No Connection", message: "No Internet connection. Please try again later.", preferredStyle: .alert)
-            ac.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-            present(ac, animated: true, completion: nil)
+            return false
         }
+        return true
     }
 
-    private func isNetworkReachable(with flag:SCNetworkReachabilityFlags) -> Bool{
-        let isReachable = flag.contains(.reachable)
-        let connectRequired = flag.contains(.connectionRequired)
-        let canAutoConnect = flag.contains(.connectionOnDemand) || flag.contains(.connectionOnTraffic)
-        let canConnectWithoutInteraction = canAutoConnect && !flag.contains(.interventionRequired)
-        return isReachable && (!connectRequired || canConnectWithoutInteraction)
+    func showNoConnectionAlert() {
+        guard viewIfLoaded?.window != nil, presentedViewController == nil else { return }
+        let ac = UIAlertController(title: "No Connection", message: "No Internet connection. Please try again later.", preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(ac, animated: true, completion: nil)
     }
-    // end of quote of network reachability
 
-    var isConnected:Bool!
+    func handleNetworkPathUpdate(_ status: NWPath.Status) {
+        // Path updates and startup state belong to the main queue.
+        dispatchPrecondition(condition: .onQueue(.main))
+        guard !hasStartedInitialLoad else { return }
+        guard status == .satisfied else {
+            searchSpinner.stopAnimating()
+            isLoading = false
+            settingPass.shareInstance.isLoading = false
+            showNoConnectionAlert()
+            return
+        }
+        hasStartedInitialLoad = true
+        loadInitialMovies()
+    }
+    // end of network reachability
+
     private let searchSpinner = UIActivityIndicatorView(style: .large)
     private let mainPageSpinner = UIActivityIndicatorView(style: .medium)
     private let theSearchBar = UISearchBar()
@@ -188,6 +196,10 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     var curLanguage:String = "en-US"
     var isSearching:Bool = false
     var isLoading:Bool = true
+
+    deinit {
+        pathMonitor.cancel()
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -208,9 +220,21 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
             collectionView.backgroundView = message
             return
         }
-        checkReachability()
+        // currentPath is not ready synchronously after start. Wait for a path
+        // update before checking connectivity or attempting the initial load.
         self.searchSpinner.isHidden = false
         self.searchSpinner.startAnimating()
+        pathMonitor.pathUpdateHandler = { [weak self] path in
+            self?.handleNetworkPathUpdate(path.status)
+        }
+        pathMonitor.start(queue: .main)
+    }
+
+    func loadInitialMovies() {
+        isLoading = true
+        settingPass.shareInstance.isLoading = true
+        searchSpinner.isHidden = false
+        searchSpinner.startAnimating()
         // DispatchQueue learned from lecture videos, lecture 10
         DispatchQueue.global(qos: .background).async {
             self.getMovieData(page: self.currentPage)
@@ -228,8 +252,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     // A function that set the language and adult content variables, then to perfrom query.
     @objc func settingSetup(){
         guard TMDBConfiguration.apiKey != nil else { return }
-        checkReachability()
-        if(isConnected == true){
+        if checkReachability() {
             isLoading = true
             settingPass.shareInstance.isLoading = true
     //        print(settingPass.shareInstance.language)
@@ -262,8 +285,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
 
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if(indexPath.row == theMovieTitle.count - 1 && isSearching == false && isLoading == false){
-            checkReachability()
-            if isConnected == true{
+            if checkReachability() {
                 isLoading = true
                 settingPass.shareInstance.isLoading = true
                 self.mainPageSpinner.isHidden = false
@@ -290,8 +312,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     */
     func getMovieData(page: Int){
         guard let apiKey = TMDBConfiguration.apiKey else { return }
-        checkReachability()
-        if(isConnected == true){
+        if checkReachability() {
             let url = URL(string: "https://api.themoviedb.org/3/discover/movie?api_key=\(apiKey)&include_adult=\(adultContent)&page=\(page)&language=\(curLanguage)&sort_by=popularity.desc")
             guard let data = try? Data(contentsOf: url!) else { return  }
             let tempResult = [try? JSONDecoder().decode(APIResults.self, from: data)]
@@ -363,8 +384,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     // The function is suggested by lecture video 10.
     func cacheImage(page: Int){
         guard theDataResult.indices.contains(page - 1) else { return }
-        checkReachability()
-        if isConnected == true{
+        if checkReachability() {
 //            print(theDataResult)
             if(theDataResult[page - 1] != nil){
                 for movie in theDataResult[page-1]!.results{
@@ -394,8 +414,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     // Learned spinner from https://stackoverflow.com/questions/28865659/hide-activity-indicator
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let apiKey = TMDBConfiguration.apiKey else { return }
-        checkReachability()
-        if isConnected == true && isLoading == false{
+        if !isLoading && checkReachability() {
             let searchText = theSearchBar.text?.replacingOccurrences(of: " ", with: "+")
     //        print(searchText)
             if searchText != nil && searchText! != ""{
@@ -482,8 +501,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        checkReachability()
-        guard isConnected == true else { return }
+        // Details use the movie and poster already loaded by the grid.
         let detail = DetailedViewController(movie: theMovieList[indexPath.row],
                                             image: theImageCache[indexPath.row])
         navigationController?.pushViewController(detail, animated: true)
